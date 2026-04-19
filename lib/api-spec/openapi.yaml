@@ -3,13 +3,19 @@ info:
   # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: OSINT Terminal API specification
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: metadata
+    description: File metadata extraction
+  - name: geolocation
+    description: Geolocation intelligence tools
+  - name: crypto
+    description: Crypto and decoding tools
 paths:
   /healthz:
     get:
@@ -24,6 +30,121 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /metadata/extract:
+    post:
+      operationId: extractMetadata
+      tags: [metadata]
+      summary: Extract metadata from uploaded file
+      description: Analyzes a file and returns all available metadata tags
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                filename:
+                  type: string
+                data:
+                  type: string
+                  description: Base64 encoded file data
+                mimeType:
+                  type: string
+              required:
+                - filename
+                - data
+      responses:
+        "200":
+          description: Metadata extraction result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MetadataResult"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /geolocation/solar-calc:
+    post:
+      operationId: solarCalc
+      tags: [geolocation]
+      summary: Calculate coordinates from shadow length and time
+      description: Uses solar math to estimate GPS coordinates from shadow measurements
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SolarCalcRequest"
+      responses:
+        "200":
+          description: Solar calculation result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SolarCalcResult"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /crypto/decode:
+    post:
+      operationId: cryptoDecode
+      tags: [crypto]
+      summary: Decode or identify encoded text
+      description: Attempts to decode text using Base64, ROT13, Hex, or identify hash types
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CryptoDecodeRequest"
+      responses:
+        "200":
+          description: Decoding results
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CryptoDecodeResult"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /crypto/identify-hash:
+    post:
+      operationId: identifyHash
+      tags: [crypto]
+      summary: Identify hash type
+      description: Identifies potential hash algorithm based on input characteristics
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                input:
+                  type: string
+              required:
+                - input
+      responses:
+        "200":
+          description: Hash identification result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HashIdentifyResult"
+
 components:
   schemas:
     HealthStatus:
@@ -34,3 +155,188 @@ components:
       required:
         - status
 
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+        message:
+          type: string
+      required:
+        - error
+        - message
+
+    MetadataTag:
+      type: object
+      properties:
+        group:
+          type: string
+        tag:
+          type: string
+        value:
+          type: string
+      required:
+        - group
+        - tag
+        - value
+
+    MetadataResult:
+      type: object
+      properties:
+        filename:
+          type: string
+        fileSize:
+          type: number
+        mimeType:
+          type: string
+        tags:
+          type: array
+          items:
+            $ref: "#/components/schemas/MetadataTag"
+        gpsFound:
+          type: boolean
+        lat:
+          type: number
+          nullable: true
+        lng:
+          type: number
+          nullable: true
+        clues:
+          type: array
+          items:
+            type: string
+      required:
+        - filename
+        - fileSize
+        - mimeType
+        - tags
+        - gpsFound
+        - clues
+
+    SolarCalcRequest:
+      type: object
+      properties:
+        shadowLength:
+          type: number
+          description: Shadow length in meters
+        objectHeight:
+          type: number
+          description: Object height in meters
+        date:
+          type: string
+          description: Date in ISO format
+        time:
+          type: string
+          description: Local time (HH:MM)
+        timezone:
+          type: string
+          description: Timezone offset (e.g. UTC+2)
+      required:
+        - shadowLength
+        - objectHeight
+        - date
+        - time
+
+    SolarCalcResult:
+      type: object
+      properties:
+        solarElevationAngle:
+          type: number
+        estimatedLatitudeRange:
+          type: object
+          properties:
+            min:
+              type: number
+            max:
+              type: number
+          required:
+            - min
+            - max
+        solarAzimuth:
+          type: number
+          nullable: true
+        explanation:
+          type: string
+        confidence:
+          type: string
+      required:
+        - solarElevationAngle
+        - estimatedLatitudeRange
+        - explanation
+        - confidence
+
+    CryptoDecodeRequest:
+      type: object
+      properties:
+        input:
+          type: string
+        methods:
+          type: array
+          items:
+            type: string
+            enum: [base64, rot13, hex, morse, binary, url, reverse]
+      required:
+        - input
+
+    DecodeResult:
+      type: object
+      properties:
+        method:
+          type: string
+        output:
+          type: string
+        success:
+          type: boolean
+        confidence:
+          type: string
+          enum: [high, medium, low]
+      required:
+        - method
+        - output
+        - success
+        - confidence
+
+    CryptoDecodeResult:
+      type: object
+      properties:
+        input:
+          type: string
+        results:
+          type: array
+          items:
+            $ref: "#/components/schemas/DecodeResult"
+        suggestions:
+          type: array
+          items:
+            type: string
+      required:
+        - input
+        - results
+        - suggestions
+
+    HashIdentifyResult:
+      type: object
+      properties:
+        input:
+          type: string
+        length:
+          type: number
+        possibleTypes:
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+              probability:
+                type: string
+            required:
+              - name
+              - probability
+        isLikelyHash:
+          type: boolean
+      required:
+        - input
+        - length
+        - possibleTypes
+        - isLikelyHash
