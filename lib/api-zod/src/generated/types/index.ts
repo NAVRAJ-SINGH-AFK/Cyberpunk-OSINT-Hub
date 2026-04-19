@@ -6,6 +6,7 @@
  * OpenAPI spec version: 0.1.0
  */
 
+export * from "./analyzeImageLocationBody";
 export * from "./cryptoDecodeRequest";
 export * from "./cryptoDecodeRequestMethodsItem";
 export * from "./cryptoDecodeResult";
@@ -17,6 +18,10 @@ export * from "./hashIdentifyResult";
 export * from "./hashIdentifyResultPossibleTypesItem";
 export * from "./healthStatus";
 export * from "./identifyHashBody";
+export * from "./imageLocationResult";
+export * from "./imageLocationResultConfidence";
+export * from "./imageLocationResultEstimatedCoordinates";
+export * from "./locationClue";
 export * from "./metadataResult";
 export * from "./metadataTag";
 export * from "./solarCalcRequest";

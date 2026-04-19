@@ -17,6 +17,7 @@ import type {
 } from "@tanstack/react-query";
 
 import type {
+  AnalyzeImageLocationBody,
   CryptoDecodeRequest,
   CryptoDecodeResult,
   ErrorResponse,
@@ -24,6 +25,7 @@ import type {
   HashIdentifyResult,
   HealthStatus,
   IdentifyHashBody,
+  ImageLocationResult,
   MetadataResult,
   SolarCalcRequest,
   SolarCalcResult,
@@ -199,6 +201,94 @@ export const useExtractMetadata = <
   TContext
 > => {
   return useMutation(getExtractMetadataMutationOptions(options));
+};
+
+/**
+ * Uses AI vision to analyze shadows, architecture, vegetation, language, and other visual cues in an image to estimate geographic location
+ * @summary Analyze image to estimate geolocation
+ */
+export const getAnalyzeImageLocationUrl = () => {
+  return `/api/geolocation/analyze-image`;
+};
+
+export const analyzeImageLocation = async (
+  analyzeImageLocationBody: AnalyzeImageLocationBody,
+  options?: RequestInit,
+): Promise<ImageLocationResult> => {
+  return customFetch<ImageLocationResult>(getAnalyzeImageLocationUrl(), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(analyzeImageLocationBody),
+  });
+};
+
+export const getAnalyzeImageLocationMutationOptions = <
+  TError = ErrorType<ErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof analyzeImageLocation>>,
+    TError,
+    { data: BodyType<AnalyzeImageLocationBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof analyzeImageLocation>>,
+  TError,
+  { data: BodyType<AnalyzeImageLocationBody> },
+  TContext
+> => {
+  const mutationKey = ["analyzeImageLocation"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof analyzeImageLocation>>,
+    { data: BodyType<AnalyzeImageLocationBody> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return analyzeImageLocation(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type AnalyzeImageLocationMutationResult = NonNullable<
+  Awaited<ReturnType<typeof analyzeImageLocation>>
+>;
+export type AnalyzeImageLocationMutationBody =
+  BodyType<AnalyzeImageLocationBody>;
+export type AnalyzeImageLocationMutationError = ErrorType<ErrorResponse>;
+
+/**
+ * @summary Analyze image to estimate geolocation
+ */
+export const useAnalyzeImageLocation = <
+  TError = ErrorType<ErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof analyzeImageLocation>>,
+    TError,
+    { data: BodyType<AnalyzeImageLocationBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof analyzeImageLocation>>,
+  TError,
+  { data: BodyType<AnalyzeImageLocationBody> },
+  TContext
+> => {
+  return useMutation(getAnalyzeImageLocationMutationOptions(options));
 };
 
 /**

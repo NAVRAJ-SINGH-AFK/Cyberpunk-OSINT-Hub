@@ -97,6 +97,42 @@ export interface CryptoDecodeResult {
   suggestions: string[];
 }
 
+export interface LocationClue {
+  category: string;
+  observation: string;
+  significance: string;
+}
+
+export type ImageLocationResultEstimatedCoordinates = {
+  lat: number;
+  lng: number;
+  radiusKm: number;
+} | null;
+
+export type ImageLocationResultConfidence =
+  (typeof ImageLocationResultConfidence)[keyof typeof ImageLocationResultConfidence];
+
+export const ImageLocationResultConfidence = {
+  high: "high",
+  medium: "medium",
+  low: "low",
+  very_low: "very_low",
+} as const;
+
+export interface ImageLocationResult {
+  estimatedCountry?: string | null;
+  estimatedRegion?: string | null;
+  estimatedCity?: string | null;
+  estimatedCoordinates?: ImageLocationResultEstimatedCoordinates;
+  confidence: ImageLocationResultConfidence;
+  clues: LocationClue[];
+  shadowAnalysis?: string | null;
+  timeOfDayEstimate?: string | null;
+  seasonEstimate?: string | null;
+  searchStrategies: string[];
+  rawAnalysis: string;
+}
+
 export type HashIdentifyResultPossibleTypesItem = {
   name: string;
   probability: string;
@@ -112,6 +148,13 @@ export interface HashIdentifyResult {
 export type ExtractMetadataBody = {
   filename: string;
   /** Base64 encoded file data */
+  data: string;
+  mimeType?: string;
+};
+
+export type AnalyzeImageLocationBody = {
+  filename: string;
+  /** Base64 encoded image data */
   data: string;
   mimeType?: string;
 };

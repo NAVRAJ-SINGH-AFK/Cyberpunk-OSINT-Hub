@@ -43,6 +43,42 @@ export const ExtractMetadataResponse = zod.object({
 });
 
 /**
+ * Uses AI vision to analyze shadows, architecture, vegetation, language, and other visual cues in an image to estimate geographic location
+ * @summary Analyze image to estimate geolocation
+ */
+export const AnalyzeImageLocationBody = zod.object({
+  filename: zod.string(),
+  data: zod.string().describe("Base64 encoded image data"),
+  mimeType: zod.string().optional(),
+});
+
+export const AnalyzeImageLocationResponse = zod.object({
+  estimatedCountry: zod.string().nullish(),
+  estimatedRegion: zod.string().nullish(),
+  estimatedCity: zod.string().nullish(),
+  estimatedCoordinates: zod
+    .object({
+      lat: zod.number(),
+      lng: zod.number(),
+      radiusKm: zod.number(),
+    })
+    .nullish(),
+  confidence: zod.enum(["high", "medium", "low", "very_low"]),
+  clues: zod.array(
+    zod.object({
+      category: zod.string(),
+      observation: zod.string(),
+      significance: zod.string(),
+    }),
+  ),
+  shadowAnalysis: zod.string().nullish(),
+  timeOfDayEstimate: zod.string().nullish(),
+  seasonEstimate: zod.string().nullish(),
+  searchStrategies: zod.array(zod.string()),
+  rawAnalysis: zod.string(),
+});
+
+/**
  * Uses solar math to estimate GPS coordinates from shadow measurements
  * @summary Calculate coordinates from shadow length and time
  */

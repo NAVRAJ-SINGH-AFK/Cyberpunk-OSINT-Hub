@@ -68,6 +68,49 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
 
+  /geolocation/analyze-image:
+    post:
+      operationId: analyzeImageLocation
+      tags: [geolocation]
+      summary: Analyze image to estimate geolocation
+      description: Uses AI vision to analyze shadows, architecture, vegetation, language, and other visual cues in an image to estimate geographic location
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                filename:
+                  type: string
+                data:
+                  type: string
+                  description: Base64 encoded image data
+                mimeType:
+                  type: string
+              required:
+                - filename
+                - data
+      responses:
+        "200":
+          description: Image geolocation analysis result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ImageLocationResult"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
   /geolocation/solar-calc:
     post:
       operationId: solarCalc
@@ -313,6 +356,74 @@ components:
         - input
         - results
         - suggestions
+
+    LocationClue:
+      type: object
+      properties:
+        category:
+          type: string
+        observation:
+          type: string
+        significance:
+          type: string
+      required:
+        - category
+        - observation
+        - significance
+
+    ImageLocationResult:
+      type: object
+      properties:
+        estimatedCountry:
+          type: string
+          nullable: true
+        estimatedRegion:
+          type: string
+          nullable: true
+        estimatedCity:
+          type: string
+          nullable: true
+        estimatedCoordinates:
+          type: object
+          nullable: true
+          properties:
+            lat:
+              type: number
+            lng:
+              type: number
+            radiusKm:
+              type: number
+          required:
+            - lat
+            - lng
+            - radiusKm
+        confidence:
+          type: string
+          enum: [high, medium, low, very_low]
+        clues:
+          type: array
+          items:
+            $ref: "#/components/schemas/LocationClue"
+        shadowAnalysis:
+          type: string
+          nullable: true
+        timeOfDayEstimate:
+          type: string
+          nullable: true
+        seasonEstimate:
+          type: string
+          nullable: true
+        searchStrategies:
+          type: array
+          items:
+            type: string
+        rawAnalysis:
+          type: string
+      required:
+        - confidence
+        - clues
+        - searchStrategies
+        - rawAnalysis
 
     HashIdentifyResult:
       type: object

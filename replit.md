@@ -27,7 +27,7 @@ pnpm workspace monorepo using TypeScript. Contains an OSINT Terminal web applica
   - Home page with ASCII art header and Matrix green terminal cards
   - CRT scanline effects and glitch hover animations
   - Module 1: Metadata Extraction (drag-and-drop, EXIF parsing, GPS detection)
-  - Module 2: Geolocation Intelligence (solar shadow calculator, observation checklist, search strategies)
+  - Module 2: Geolocation Intelligence (AI vision image analyzer via GPT-4o, observation checklist, reverse image search links)
   - Module 3: Crypto/Decoding (Base64, ROT13, Hex, Morse, Binary, URL, hash identification)
 
 ### API Server (`artifacts/api-server`)
