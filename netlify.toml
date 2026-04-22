@@ -1,0 +1,3 @@
+[build]
+  command = "pnpm --filter @workspace/osint-terminal build"
+  publish = "artifacts/osint-terminal/dist/public"
